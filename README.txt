@@ -4,7 +4,7 @@ validating credit card information.
 Example usage:
 
 from django import forms
-from creditcard.fields import CreditCardField, ExpiryDateField
+from fields import CreditCardField, ExpiryDateField
 
 class PaymentForm(forms.Form):
 
