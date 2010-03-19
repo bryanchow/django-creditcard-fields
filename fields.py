@@ -8,6 +8,7 @@ from django.utils.translation import ugettext_lazy as _
 
 CREDIT_CARD_RE = r'^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\\d{3})\d{11})$'
 MONTH_FORMAT = getattr(settings, 'MONTH_FORMAT', '%b')
+VERIFICATION_VALUE_RE = r'^([0-9]{3,4})$'
 
 
 class CreditCardField(forms.CharField):
@@ -90,3 +91,23 @@ class ExpiryDateField(forms.MultiValueField):
             return date(year, month, day)
         return None
 
+
+class VerificationValueField(forms.CharField):
+    """
+    Form field that validates credit card verification values (e.g. CVV2).
+    See http://en.wikipedia.org/wiki/Card_Security_Code
+    """
+
+    widget = forms.TextInput(attrs={'maxlength': 4})
+    default_error_messages = {
+        'required': _(u'Please enter the three- or four-digit verification code for your credit card.'),
+        'invalid': _(u'The verification value you entered is invalid.'),
+    }
+
+    def clean(self, value):
+        value = value.replace(' ', '')
+        if not value:
+            raise forms.util.ValidationError(self.error_messages['required'])
+        if not re.match(VERIFICATION_VALUE_RE, value):
+            raise forms.util.ValidationError(self.error_messages['invalid'])
+        return value
