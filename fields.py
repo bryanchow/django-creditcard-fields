@@ -23,9 +23,9 @@ class CreditCardField(forms.CharField):
 
     def clean(self, value):
         value = value.replace(' ', '').replace('-', '')
-        if not value:
+        if self.required and not value:
             raise forms.util.ValidationError(self.error_messages['required'])
-        if not re.match(CREDIT_CARD_RE, value):
+        if value and not re.match(CREDIT_CARD_RE, value):
             raise forms.util.ValidationError(self.error_messages['invalid'])
         return value
 
@@ -106,8 +106,8 @@ class VerificationValueField(forms.CharField):
 
     def clean(self, value):
         value = value.replace(' ', '')
-        if not value:
+        if not value and self.required:
             raise forms.util.ValidationError(self.error_messages['required'])
-        if not re.match(VERIFICATION_VALUE_RE, value):
+        if value and not re.match(VERIFICATION_VALUE_RE, value):
             raise forms.util.ValidationError(self.error_messages['invalid'])
         return value
