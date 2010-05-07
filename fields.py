@@ -72,7 +72,7 @@ class ExpiryDateField(forms.MultiValueField):
 
     def clean(self, value):
         expiry_date = super(ExpiryDateField, self).clean(value)
-        if today > expiry_date:
+        if date.today() > expiry_date:
             raise forms.ValidationError(self.error_messages['date_passed'])
         return expiry_date
 
