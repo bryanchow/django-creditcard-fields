@@ -54,11 +54,15 @@ class ExpiryDateField(forms.MultiValueField):
     }
 
     def __init__(self, *args, **kwargs):
+        today = date.today()
         error_messages = self.default_error_messages.copy()
         if 'error_messages' in kwargs:
             error_messages.update(kwargs['error_messages'])
+        if 'initial' not in kwargs:
+            # Set default expiry date based on current month and year
+            kwargs['initial'] = today
         months = [(x, '%02d (%s)' % (x, date(2000, x, 1).strftime(MONTH_FORMAT))) for x in xrange(1, 13)]
-        years = [(x, x) for x in xrange(date.today().year, date.today().year + 15)]
+        years = [(x, x) for x in xrange(today.year, today.year + 15)]
         fields = (
             forms.ChoiceField(choices=months, error_messages={'invalid': error_messages['invalid_month']}),
             forms.ChoiceField(choices=years, error_messages={'invalid': error_messages['invalid_year']}),
@@ -68,7 +72,7 @@ class ExpiryDateField(forms.MultiValueField):
 
     def clean(self, value):
         expiry_date = super(ExpiryDateField, self).clean(value)
-        if date.today() > expiry_date:
+        if today > expiry_date:
             raise forms.ValidationError(self.error_messages['date_passed'])
         return expiry_date
 
